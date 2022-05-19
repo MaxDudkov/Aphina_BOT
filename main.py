@@ -25,12 +25,27 @@ def echo(update, context):
 
 
 def start(update, context):
-    buttons = [KeyboardButton("button1"),
-               KeyboardButton("button2"),
-               KeyboardButton("button3")]
+    buttons = [KeyboardButton("О нас"),
+               KeyboardButton("Контакты"),
+               KeyboardButton("Услуги")]
 
-    replyMarkup = ReplyKeyboardMarkup(menuBuilder(buttons, 2))
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Приветственное сообщение", reply_markup=replyMarkup)
+    replyMarkup = ReplyKeyboardMarkup(menuBuilder(buttons, 3))
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text="Приветственное сообщение",
+                             reply_markup=replyMarkup)
+
+
+def services(update, context):
+    buttons = [KeyboardButton("Курсы"),
+               KeyboardButton("Домашнее задание"),
+               KeyboardButton("Статистика"),
+               KeyboardButton("Мини-Игры"),
+               KeyboardButton("Назад")]
+
+    replyMarkup = ReplyKeyboardMarkup(menuBuilder(buttons, 4))
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text="Выберите, чем займемся сегодня",
+                             reply_markup=replyMarkup)
 
 
 def button(update, _):
@@ -41,11 +56,13 @@ def button(update, _):
     query.edit_message_text(text=f"Выбранный вариант: {buttonValue}")
 
 def about(update, context):
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Наши решения")
+    replyMarkup = ReplyKeyboardMarkup(menuBuilder([KeyboardButton("Назад")], 1))
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Наши решения", reply_markup=replyMarkup)
 
 
 def contact(update, context):
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Контакты")
+    replyMarkup = ReplyKeyboardMarkup(menuBuilder([KeyboardButton("Назад")], 1))
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Контакты", reply_markup=replyMarkup)
 
 
 if __name__ == '__main__':
@@ -55,14 +72,19 @@ if __name__ == '__main__':
     dispatcher = updater.dispatcher
 
     startHandler = CommandHandler('start', start)
-    aboutHandler = CommandHandler('about', about)
-    contactHandler = CommandHandler('contacts', contact)
+    aboutHandler = MessageHandler(Filters.text("О нас"), about)
+    contactHandler = MessageHandler(Filters.text("Контакты"), contact)
+    serviceHandler = MessageHandler(Filters.text("Услуги"), services)
+    backHandler = MessageHandler(Filters.text("Назад"), start)
     buttonHandler = CallbackQueryHandler(button)
+
     echoHandler = MessageHandler(Filters.text & (~Filters.command), echo)
 
     dispatcher.add_handler(startHandler)
     dispatcher.add_handler(aboutHandler)
     dispatcher.add_handler(contactHandler)
+    dispatcher.add_handler(serviceHandler)
+    dispatcher.add_handler(backHandler)
     dispatcher.add_handler(buttonHandler)
     dispatcher.add_handler(echoHandler)
 
