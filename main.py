@@ -24,7 +24,7 @@ def echo(update, context):
             update.message.reply_text(f'Я пока не знаю, что на это ответить :(')
 
 
-def start(update, context):
+def firstStart(update, context):
     buttons = [KeyboardButton("О нас"),
                KeyboardButton("Контакты"),
                KeyboardButton("Услуги")]
@@ -35,6 +35,17 @@ def start(update, context):
                                   "Я твой путеводитель в мир образования. "
                                   "Уверена что мы с тобой сработаемся и достигнем множества вершин. "
                                   "Мне не терпится показать тебе что я могу. Давай же начнём!🥳",
+                             reply_markup=replyMarkup)
+
+
+def start(update, context):
+    buttons = [KeyboardButton("О нас"),
+               KeyboardButton("Контакты"),
+               KeyboardButton("Услуги")]
+
+    replyMarkup = ReplyKeyboardMarkup(menuBuilder(buttons, 3))
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text="Чем займёмся теперь ?",
                              reply_markup=replyMarkup)
 
 
@@ -262,7 +273,7 @@ if __name__ == '__main__':
 
     dispatcher = updater.dispatcher
 
-    startHandler = CommandHandler('start', start)
+    startHandler = CommandHandler('start', firstStart)
     aboutHandler = MessageHandler(Filters.text("О нас"), about)
     contactHandler = MessageHandler(Filters.text("Контакты"), contact)
     serviceHandler = MessageHandler(Filters.text("Услуги"), services)
