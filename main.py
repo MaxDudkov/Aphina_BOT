@@ -235,8 +235,22 @@ def about(update, context):
 
 
 def contact(update, context):
-    replyMarkup = ReplyKeyboardMarkup(menuBuilder([KeyboardButton("Назад")], 1))
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Контакты", reply_markup=replyMarkup)
+    buttons = [InlineKeyboardButton("Мы Вконтакте💙", url="https://vk.com/cg_rus"),
+               InlineKeyboardButton("Мы в YouTube❤", url="https://www.youtube.com/channel/UC22mNxwdy5YgIObb-l-pfWw"),
+               InlineKeyboardButton("Мы в Telegram💜", url="https://t.me/edutainment_com")]
+
+    replyMarkup = InlineKeyboardMarkup(menuBuilder(buttons, 1))
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Наши контакты!\n\n"
+                                                                    "Офис в Москве:\n129343, проезд Серебрякова, 14с15,"
+                                                                    "БЦ «Сильвер Стоун»."
+                                                                    "\nEmail:\nletsplay@center-game.com"
+                                                                    "\nТелефон:\n+7 985 338 32 93", reply_markup=replyMarkup)
+
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Представительство в Узбекистане:\n\n"
+                                                                    "Адрес: 100052, г. Ташкент, ул. Кургон, 3-й проезд, д.3"
+                                                                    "\nEmail: \nlev.gavrish@gmail.com"
+                                                                    "\nWeb: \nwww.change.uz"
+                                                                    "\nТелефон: \n+998 (93) 555 0210")
 
 
 if __name__ == '__main__':
