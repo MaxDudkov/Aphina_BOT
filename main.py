@@ -58,7 +58,7 @@ def services(update, context):
                KeyboardButton("Мини-Игры"),
                KeyboardButton("Назад")]
 
-    replyMarkup = ReplyKeyboardMarkup(menuBuilder(buttons, 4))
+    replyMarkup = ReplyKeyboardMarkup(menuBuilder(buttons, 2))
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text="Выберите, чем займемся сегодня",
                              reply_markup=replyMarkup)
@@ -66,8 +66,8 @@ def services(update, context):
 
 def kurses(update, context):
     buttons = [KeyboardButton("Информационные системы в организации"),
-               KeyboardButton("Курс 2"),
-               KeyboardButton("Курс 3"),
+               KeyboardButton("Микроэкономика"),
+               KeyboardButton("Волновая физика"),
                KeyboardButton("Назaд")]
 
     replyMarkup = ReplyKeyboardMarkup(menuBuilder(buttons, 1))
@@ -104,11 +104,11 @@ def course_1_modul_3(update, context):
 
 def course2_moduls(update, context):
     buttons = [KeyboardButton("Введение в микроэкономику"),
-               KeyboardButton("ПРЕДПРИЯТИЕ (ФИРМА)"),
+               KeyboardButton("Предприятие (Фирма)"),
                KeyboardButton("Издержки и доходы предприятия"),
                KeyboardButton("Нaзaд")]
 
-    replyMarkup = ReplyKeyboardMarkup(menuBuilder(buttons, 3))
+    replyMarkup = ReplyKeyboardMarkup(menuBuilder(buttons, 1))
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text="Выберите, чем займемся сегодня",
                              reply_markup=replyMarkup)
@@ -134,7 +134,7 @@ def course3_moduls(update, context):
                KeyboardButton("Электромагнитные волны световая волна"),
                KeyboardButton("Нaзaд")]
 
-    replyMarkup = ReplyKeyboardMarkup(menuBuilder(buttons, 3))
+    replyMarkup = ReplyKeyboardMarkup(menuBuilder(buttons, 1))
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text="Выберите, чем займемся сегодня",
                              reply_markup=replyMarkup)
@@ -549,7 +549,7 @@ if __name__ == '__main__':
 
     modul2Handler = MessageHandler(Filters.text("Микроэкономика"), course2_moduls)
     course_2_1_Handler = MessageHandler(Filters.text("Введение в микроэкономику"), course_2_modul_1)
-    course_2_2_Handler = MessageHandler(Filters.text("ПРЕДПРИЯТИЕ (ФИРМА)"), course_2_modul_2)
+    course_2_2_Handler = MessageHandler(Filters.text("Предприятие (фирма)"), course_2_modul_2)
     course_2_3_Handler = MessageHandler(Filters.text("Издержки и доходы предприятия"), course_2_modul_3)
 
     modul3Handler = MessageHandler(Filters.text("Волновая физика"), course3_moduls)
