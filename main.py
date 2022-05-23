@@ -85,6 +85,21 @@ def course1_moduls(update, context):
                              text="Выберите, чем займемся сегодня",
                              reply_markup=replyMarkup)
 
+def course_1_modul_1(update, context):
+    filename = open('./courses/course1_1.pdf', 'rb')
+    context.bot.send_document(update.effective_chat.id, filename)
+
+
+def course_1_modul_2(update, context):
+    filename = open('./courses/course1_2.pdf', 'rb')
+    context.bot.send_document(update.effective_chat.id, filename)
+
+
+def course_1_modul_3(update, context):
+    filename = open('./courses/course1_3.pdf', 'rb')
+    context.bot.send_document(update.effective_chat.id, filename)
+
+
 def course2_moduls(update, context):
     buttons = [KeyboardButton("Модуль 1"),
                KeyboardButton("Модуль 2"),
@@ -366,16 +381,24 @@ if __name__ == '__main__':
     dispatcher = updater.dispatcher
 
     startHandler = CommandHandler('start', firstStart)
+
     aboutHandler = MessageHandler(Filters.text("О нас"), about)
     contactHandler = MessageHandler(Filters.text("Контакты"), contact)
     serviceHandler = MessageHandler(Filters.text("Услуги"), services)
     backHandler = MessageHandler(Filters.text("Назад"), start)
+
     kursesHandler = MessageHandler(Filters.text("Курсы"), kurses)
     backkHandler = MessageHandler(Filters.text("Назaд"), services)
-    backkkHandler = MessageHandler(Filters.text("Нaзaд"), kurses)
+
     modul1Handler = MessageHandler(Filters.text("Информационные системы в организации"), course1_moduls)
+    course_1_1_Handler = MessageHandler(Filters.text("Информация и информационные технологии"), course_1_modul_1)
+    course_1_2_Handler = MessageHandler(Filters.text("Правовые информационные системы"), course_1_modul_2)
+    course_1_3_Handler = MessageHandler(Filters.text("Информационные технологии и структура управления"), course_1_modul_3)
+
     modul2Handler = MessageHandler(Filters.text("Курс 2"), course2_moduls)
     modul3Handler = MessageHandler(Filters.text("Курс 3"), course3_moduls)
+    backkkHandler = MessageHandler(Filters.text("Нaзaд"), kurses)
+
     kurses1Handler = MessageHandler(Filters.text("Домашнее задание"), hm_course)
     modul11Handler = MessageHandler(Filters.text("Курc 1"), hm_course1_moduls)
     modul22Handler = MessageHandler(Filters.text("Курc 2"), hm_course2_moduls)
@@ -390,12 +413,19 @@ if __name__ == '__main__':
     dispatcher.add_handler(serviceHandler)
     dispatcher.add_handler(backHandler)
     dispatcher.add_handler(buttonHandler)
+
     dispatcher.add_handler(kursesHandler)
     dispatcher.add_handler(backkHandler)
+
     dispatcher.add_handler(modul1Handler)
+    dispatcher.add_handler(course_1_1_Handler)
+    dispatcher.add_handler(course_1_2_Handler)
+    dispatcher.add_handler(course_1_3_Handler)
+
     dispatcher.add_handler(modul2Handler)
     dispatcher.add_handler(modul3Handler)
     dispatcher.add_handler(backkkHandler)
+
     dispatcher.add_handler(kurses1Handler)
     dispatcher.add_handler(modul11Handler)
     dispatcher.add_handler(modul22Handler)
