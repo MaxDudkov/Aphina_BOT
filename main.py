@@ -63,18 +63,29 @@ def services(update, context):
 
 
 def kurses(update, context):
-    buttons = [KeyboardButton("Курс 1"),
+    buttons = [KeyboardButton("Информационные системы в организации"),
                KeyboardButton("Курс 2"),
                KeyboardButton("Курс 3"),
                KeyboardButton("Назaд")]
 
-    replyMarkup = ReplyKeyboardMarkup(menuBuilder(buttons, 3))
+    replyMarkup = ReplyKeyboardMarkup(menuBuilder(buttons, 1))
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text="Выберите курс, который хотите пройти",
+                             reply_markup=replyMarkup)
+
+
+def course1_moduls(update, context):
+    buttons = [KeyboardButton("Информация и информационные технологии"),
+               KeyboardButton("Правовые информационные системы"),
+               KeyboardButton("Информационные технологии и структура управления"),
+               KeyboardButton("Нaзaд")]
+
+    replyMarkup = ReplyKeyboardMarkup(menuBuilder(buttons, 1))
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text="Выберите, чем займемся сегодня",
                              reply_markup=replyMarkup)
 
-
-def modul1(update, context):
+def course2_moduls(update, context):
     buttons = [KeyboardButton("Модуль 1"),
                KeyboardButton("Модуль 2"),
                KeyboardButton("Модуль 3"),
@@ -85,7 +96,8 @@ def modul1(update, context):
                              text="Выберите, чем займемся сегодня",
                              reply_markup=replyMarkup)
 
-def modul2(update, context):
+
+def course3_moduls(update, context):
     buttons = [KeyboardButton("Модуль 1"),
                KeyboardButton("Модуль 2"),
                KeyboardButton("Модуль 3"),
@@ -96,21 +108,9 @@ def modul2(update, context):
                              text="Выберите, чем займемся сегодня",
                              reply_markup=replyMarkup)
 
-
-def modul3(update, context):
-    buttons = [KeyboardButton("Модуль 1"),
-               KeyboardButton("Модуль 2"),
-               KeyboardButton("Модуль 3"),
-               KeyboardButton("Нaзaд")]
-
-    replyMarkup = ReplyKeyboardMarkup(menuBuilder(buttons, 3))
-    context.bot.send_message(chat_id=update.effective_chat.id,
-                             text="Выберите, чем займемся сегодня",
-                             reply_markup=replyMarkup)
-
-def kurses1(update, context):
+def hm_course(update, context):
     buttons = [KeyboardButton("Курc 1"),
-               KeyboardButton("Курc2"),
+               KeyboardButton("Курc 2"),
                KeyboardButton("Курc 3"),
                KeyboardButton("Назaд")]
 
@@ -120,7 +120,7 @@ def kurses1(update, context):
                              reply_markup=replyMarkup)
 
 
-def modul11(update, context):
+def hm_course1_moduls(update, context):
     buttons = [KeyboardButton("Модуль 1"),
                KeyboardButton("Модуль 2"),
                KeyboardButton("Модуль 3"),
@@ -131,7 +131,7 @@ def modul11(update, context):
                              text="Выберите, чем займемся сегодня",
                              reply_markup=replyMarkup)
 
-def modul22(update, context):
+def hm_course2_moduls(update, context):
     buttons = [KeyboardButton("Модуль 1"),
                KeyboardButton("Модуль 2"),
                KeyboardButton("Модуль 3"),
@@ -142,7 +142,7 @@ def modul22(update, context):
                              text="Выберите, чем займемся сегодня",
                              reply_markup=replyMarkup)
 
-def modul33(update, context):
+def hm_course3_moduls(update, context):
     buttons = [KeyboardButton("Модуль 1"),
                KeyboardButton("Модуль 2"),
                KeyboardButton("Модуль 3"),
@@ -372,14 +372,14 @@ if __name__ == '__main__':
     backHandler = MessageHandler(Filters.text("Назад"), start)
     kursesHandler = MessageHandler(Filters.text("Курсы"), kurses)
     backkHandler = MessageHandler(Filters.text("Назaд"), services)
-    modul1Handler = MessageHandler(Filters.text("Курс 1"), modul1)
     backkkHandler = MessageHandler(Filters.text("Нaзaд"), kurses)
-    modul2Handler = MessageHandler(Filters.text("Курс 2"), modul2)
-    modul3Handler = MessageHandler(Filters.text("Курс 3"), modul3)
-    kurses1Handler = MessageHandler(Filters.text("Домашнее задание"), kurses1)
-    modul11Handler = MessageHandler(Filters.text("Курc 1"), modul11)
-    modul22Handler = MessageHandler(Filters.text("Курc 2"), modul22)
-    modul33Handler = MessageHandler(Filters.text("Курc 3"), modul33)
+    modul1Handler = MessageHandler(Filters.text("Информационные системы в организации"), course1_moduls)
+    modul2Handler = MessageHandler(Filters.text("Курс 2"), course2_moduls)
+    modul3Handler = MessageHandler(Filters.text("Курс 3"), course3_moduls)
+    kurses1Handler = MessageHandler(Filters.text("Домашнее задание"), hm_course)
+    modul11Handler = MessageHandler(Filters.text("Курc 1"), hm_course1_moduls)
+    modul22Handler = MessageHandler(Filters.text("Курc 2"), hm_course2_moduls)
+    modul33Handler = MessageHandler(Filters.text("Курc 3"), hm_course3_moduls)
     buttonHandler = CallbackQueryHandler(button)
 
     echoHandler = MessageHandler(Filters.text & (~Filters.command), echo)
