@@ -111,6 +111,20 @@ def course2_moduls(update, context):
                              text="Выберите, чем займемся сегодня",
                              reply_markup=replyMarkup)
 
+def course_2_modul_1(update, context):
+    filename = open('./courses/course2_1.pdf', 'rb')
+    context.bot.send_document(update.effective_chat.id, filename)
+
+
+def course_2_modul_2(update, context):
+    filename = open('./courses/course2_2.pdf', 'rb')
+    context.bot.send_document(update.effective_chat.id, filename)
+
+
+def course_2_modul_3(update, context):
+    filename = open('./courses/course2_3.pdf', 'rb')
+    context.bot.send_document(update.effective_chat.id, filename)
+
 
 def course3_moduls(update, context):
     buttons = [KeyboardButton("Модуль 1"),
@@ -122,6 +136,20 @@ def course3_moduls(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text="Выберите, чем займемся сегодня",
                              reply_markup=replyMarkup)
+
+def course_3_modul_1(update, context):
+    filename = open('./courses/course3_1.pdf', 'rb')
+    context.bot.send_document(update.effective_chat.id, filename)
+
+
+def course_3_modul_2(update, context):
+    filename = open('./courses/course3_2.pdf', 'rb')
+    context.bot.send_document(update.effective_chat.id, filename)
+
+
+def course_3_modul_3(update, context):
+    filename = open('./courses/course3_3.pdf', 'rb')
+    context.bot.send_document(update.effective_chat.id, filename)
 
 def hm_course(update, context):
     buttons = [KeyboardButton("Курc 1"),
@@ -395,6 +423,16 @@ if __name__ == '__main__':
     course_1_2_Handler = MessageHandler(Filters.text("Правовые информационные системы"), course_1_modul_2)
     course_1_3_Handler = MessageHandler(Filters.text("Информационные технологии и структура управления"), course_1_modul_3)
 
+    modul2Handler = MessageHandler(Filters.text("Микроэкономика"), course2_moduls)
+    course_2_1_Handler = MessageHandler(Filters.text("Информация и информационные технологии"), course_2_modul_1)
+    course_2_2_Handler = MessageHandler(Filters.text("Правовые информационные системы"), course_2_modul_2)
+    course_2_3_Handler = MessageHandler(Filters.text("Информационные технологии и структура управления"), course_2_modul_3)
+
+    modul3Handler = MessageHandler(Filters.text("Волновая физика"), course3_moduls)
+    course_3_1_Handler = MessageHandler(Filters.text("Информация и информационные технологии"), course_3_modul_1)
+    course_3_2_Handler = MessageHandler(Filters.text("Правовые информационные системы"), course_3_modul_2)
+    course_3_3_Handler = MessageHandler(Filters.text("Информационные технологии и структура управления"), course_3_modul_3)
+
     modul2Handler = MessageHandler(Filters.text("Курс 2"), course2_moduls)
     modul3Handler = MessageHandler(Filters.text("Курс 3"), course3_moduls)
     backkkHandler = MessageHandler(Filters.text("Нaзaд"), kurses)
@@ -421,6 +459,14 @@ if __name__ == '__main__':
     dispatcher.add_handler(course_1_1_Handler)
     dispatcher.add_handler(course_1_2_Handler)
     dispatcher.add_handler(course_1_3_Handler)
+
+    dispatcher.add_handler(course_2_1_Handler)
+    dispatcher.add_handler(course_2_2_Handler)
+    dispatcher.add_handler(course_2_3_Handler)
+
+    dispatcher.add_handler(course_3_1_Handler)
+    dispatcher.add_handler(course_3_2_Handler)
+    dispatcher.add_handler(course_3_3_Handler)
 
     dispatcher.add_handler(modul2Handler)
     dispatcher.add_handler(modul3Handler)
