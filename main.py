@@ -101,9 +101,9 @@ def course_1_modul_3(update, context):
 
 
 def course2_moduls(update, context):
-    buttons = [KeyboardButton("Модуль 1"),
-               KeyboardButton("Модуль 2"),
-               KeyboardButton("Модуль 3"),
+    buttons = [KeyboardButton("Введение в микроэкономику"),
+               KeyboardButton("ПРЕДПРИЯТИЕ (ФИРМА)"),
+               KeyboardButton("Издержки и доходы предприятия"),
                KeyboardButton("Нaзaд")]
 
     replyMarkup = ReplyKeyboardMarkup(menuBuilder(buttons, 3))
@@ -127,9 +127,9 @@ def course_2_modul_3(update, context):
 
 
 def course3_moduls(update, context):
-    buttons = [KeyboardButton("Модуль 1"),
-               KeyboardButton("Модуль 2"),
-               KeyboardButton("Модуль 3"),
+    buttons = [KeyboardButton("Упругие волны скорость энергия"),
+               KeyboardButton("Стоячая волна эффект Доплера"),
+               KeyboardButton("Электромагнитные волны световая волна"),
                KeyboardButton("Нaзaд")]
 
     replyMarkup = ReplyKeyboardMarkup(menuBuilder(buttons, 3))
@@ -424,17 +424,15 @@ if __name__ == '__main__':
     course_1_3_Handler = MessageHandler(Filters.text("Информационные технологии и структура управления"), course_1_modul_3)
 
     modul2Handler = MessageHandler(Filters.text("Микроэкономика"), course2_moduls)
-    course_2_1_Handler = MessageHandler(Filters.text("Информация и информационные технологии"), course_2_modul_1)
-    course_2_2_Handler = MessageHandler(Filters.text("Правовые информационные системы"), course_2_modul_2)
-    course_2_3_Handler = MessageHandler(Filters.text("Информационные технологии и структура управления"), course_2_modul_3)
+    course_2_1_Handler = MessageHandler(Filters.text("Введение в микроэкономику"), course_2_modul_1)
+    course_2_2_Handler = MessageHandler(Filters.text("ПРЕДПРИЯТИЕ (ФИРМА)"), course_2_modul_2)
+    course_2_3_Handler = MessageHandler(Filters.text("Издержки и доходы предприятия"), course_2_modul_3)
 
     modul3Handler = MessageHandler(Filters.text("Волновая физика"), course3_moduls)
-    course_3_1_Handler = MessageHandler(Filters.text("Информация и информационные технологии"), course_3_modul_1)
-    course_3_2_Handler = MessageHandler(Filters.text("Правовые информационные системы"), course_3_modul_2)
-    course_3_3_Handler = MessageHandler(Filters.text("Информационные технологии и структура управления"), course_3_modul_3)
+    course_3_1_Handler = MessageHandler(Filters.text("Упругие волны скорость энергия"), course_3_modul_1)
+    course_3_2_Handler = MessageHandler(Filters.text("Стоячая волна эффект Доплера"), course_3_modul_2)
+    course_3_3_Handler = MessageHandler(Filters.text("Электромагнитные волны световая волна"), course_3_modul_3)
 
-    modul2Handler = MessageHandler(Filters.text("Курс 2"), course2_moduls)
-    modul3Handler = MessageHandler(Filters.text("Курс 3"), course3_moduls)
     backkkHandler = MessageHandler(Filters.text("Нaзaд"), kurses)
 
     kurses1Handler = MessageHandler(Filters.text("Домашнее задание"), hm_course)
