@@ -37,6 +37,8 @@ def firstStart(update, context):
                                   "Мне не терпится показать тебе что я могу. Давай же начнём!🥳",
                              reply_markup=replyMarkup)
 
+    scoreBase[update.message.from_user.username] = 0
+
 
 def start(update, context):
     buttons = [KeyboardButton("О нас"),
@@ -124,48 +126,125 @@ def course3_moduls(update, context):
                              reply_markup=replyMarkup)
 
 def hm_course(update, context):
-    buttons = [KeyboardButton("Курc 1"),
-               KeyboardButton("Курc 2"),
-               KeyboardButton("Курc 3"),
+    buttons = [KeyboardButton("Тест по теме \"Информационные системы в организации\""),
+               KeyboardButton("Тест по теме \"Микроэкономика\""),
+               KeyboardButton("Тест по теме \"Волновая физика\""),
                KeyboardButton("Назaд")]
 
-    replyMarkup = ReplyKeyboardMarkup(menuBuilder(buttons, 3))
+    replyMarkup = ReplyKeyboardMarkup(menuBuilder(buttons, 1))
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text="Выберите, чем займемся сегодня",
                              reply_markup=replyMarkup)
 
 
-def hm_course1_moduls(update, context):
-    buttons = [KeyboardButton("Модуль 1"),
-               KeyboardButton("Модуль 2"),
-               KeyboardButton("Модуль 3"),
-               KeyboardButton("Нaзaд")]
+# def answer(update, context):
+#     query = update.callback_query
+#     answ = query.data
+#
+#     query.answer()
+#     query.delete_message()
+#
+#     if(answ == "right"):
+#         context.bot.send_message(chat_id=update.effective_chat.id, text="Правильно!")
+#     else:
+#         context.bot.send_message(chat_id=update.effective_chat.id, text="Неправильно!")
 
-    replyMarkup = ReplyKeyboardMarkup(menuBuilder(buttons, 3))
+
+def hm_course1_test(update, context):
+    # answerHandler = CallbackQueryHandler(answer)
+    buttons = [InlineKeyboardButton(text="Каскадная модель", callback_data='right'),
+               InlineKeyboardButton(text="Модель параллельной разработки программных модулей", callback_data='wrong'),
+               InlineKeyboardButton(text="Модель комплексного подхода к разработке ИС", callback_data='wrong'),
+               InlineKeyboardButton(text="Объектно-ориентированная модель", callback_data='wrong')]
+
+    replyMarkup = InlineKeyboardMarkup(menuBuilder(buttons, 1))
     context.bot.send_message(chat_id=update.effective_chat.id,
-                             text="Выберите, чем займемся сегодня",
+                             text="Наиболее распространённой моделью жизненного цикла является...",
                              reply_markup=replyMarkup)
 
-def hm_course2_moduls(update, context):
-    buttons = [KeyboardButton("Модуль 1"),
-               KeyboardButton("Модуль 2"),
-               KeyboardButton("Модуль 3"),
-               KeyboardButton("Нaзaд")]
+    buttons = [InlineKeyboardButton(text="Закон убывающей доходности", callback_data='wrong'),
+               InlineKeyboardButton(text="Закон циклического развития общества", callback_data='wrong'),
+               InlineKeyboardButton(text="Закон “необходимого разнообразия", callback_data='right'),
+               InlineKeyboardButton(text="Закон единства и борьбы противоположностей", callback_data='wrong')]
 
-    replyMarkup = ReplyKeyboardMarkup(menuBuilder(buttons, 3))
+    replyMarkup = InlineKeyboardMarkup(menuBuilder(buttons, 1))
     context.bot.send_message(chat_id=update.effective_chat.id,
-                             text="Выберите, чем займемся сегодня",
+                             text="Вопрос 2\nВ каком законе отображается объективность процесса информатизации общества?",
                              reply_markup=replyMarkup)
 
-def hm_course3_moduls(update, context):
-    buttons = [KeyboardButton("Модуль 1"),
-               KeyboardButton("Модуль 2"),
-               KeyboardButton("Модуль 3"),
-               KeyboardButton("Нaзaд")]
+    buttons = [InlineKeyboardButton(text="Cообщения, находящиеся в памяти компьютера", callback_data='wrong'),
+               InlineKeyboardButton(text="Cообщения, находящиеся в хранилищах данных", callback_data='wrong'),
+               InlineKeyboardButton(text="Предварительно обработанные данные, годные для принятия управленческих решений", callback_data='right'),
+               InlineKeyboardButton(text="Сообщения, зафиксированные на машинных носителях", callback_data='wrong')]
 
-    replyMarkup = ReplyKeyboardMarkup(menuBuilder(buttons, 3))
+    replyMarkup = InlineKeyboardMarkup(menuBuilder(buttons, 1))
     context.bot.send_message(chat_id=update.effective_chat.id,
-                             text="Выберите, чем займемся сегодня",
+                             text="Вопрос 3\nИнформация-это?",
+                             reply_markup=replyMarkup)
+
+def hm_course2_test(update, context):
+    # answerHandler = CallbackQueryHandler(answer)
+    buttons = [InlineKeyboardButton(text="Джоан Робинсон", callback_data='right'),
+               InlineKeyboardButton(text="Адамом Смитом", callback_data='wrong'),
+               InlineKeyboardButton(text="Джоном Кейнсом", callback_data='wrong'),
+               InlineKeyboardButton(text="Альфредом Маршаллом", callback_data='wrong')]
+
+    replyMarkup = InlineKeyboardMarkup(menuBuilder(buttons, 1))
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text="Наиболее глубокий и полный анализ кардинально новых моментов несовершенной конкуренции был дан?",
+                             reply_markup=replyMarkup)
+
+    buttons = [InlineKeyboardButton(text="Минимальные средние издержки меньше, чем предельные издержки", callback_data='wrong'),
+               InlineKeyboardButton(text="Цена меньше, чем минимальные средние переменные издержки", callback_data='right'),
+               InlineKeyboardButton(text="Цена меньше, чем средние постоянные издержки", callback_data='wrong'),
+               InlineKeyboardButton(text="Цена меньше, чем минимальные переменные издержки", callback_data='wrong')]
+
+    replyMarkup = InlineKeyboardMarkup(menuBuilder(buttons, 1))
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text="Вопрос 2\nВ коротком периоде фирма с целью максимизировать прибыль или "
+                                  "минимизировать убытки не должна производить товар, если:",
+                             reply_markup=replyMarkup)
+
+    buttons = [InlineKeyboardButton(text="Равновесие рынка труда нарушается из-за влияния профсоюзов", callback_data='wrong'),
+               InlineKeyboardButton(text="Безработица характеризуется «естественным» уровнем", callback_data='wrong'),
+               InlineKeyboardButton(text="Безработица препятствует нормальному функционированию рынка труда", callback_data='wrong'),
+               InlineKeyboardButton(text="Безработица невозможна, если на рынке труда существует равновесие", callback_data='right')]
+
+    replyMarkup = InlineKeyboardMarkup(menuBuilder(buttons, 1))
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text="Вопрос 3\nПо мнению неоклассиков...",
+                             reply_markup=replyMarkup)
+
+
+def hm_course3_test(update, context):
+    # answerHandler = CallbackQueryHandler(answer)
+    buttons = [InlineKeyboardButton(text="Менее 20 Гц", callback_data='wrong'),
+               InlineKeyboardButton(text="От 20 до 20 000 Гц", callback_data='wrong'),
+               InlineKeyboardButton(text="Превышает 20 000 Гц", callback_data='right')]
+
+    replyMarkup = InlineKeyboardMarkup(menuBuilder(buttons, 1))
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text="Ультразвуковыми называются колебания, частота которых ...",
+                             reply_markup=replyMarkup)
+
+    buttons = [InlineKeyboardButton(text="0,4 с", callback_data='right'),
+               InlineKeyboardButton(text="0,2 с", callback_data='wrong'),
+               InlineKeyboardButton(text="0,3 с", callback_data='wrong')]
+
+    replyMarkup = InlineKeyboardMarkup(menuBuilder(buttons, 1))
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text="Вопрос 2\nЧерез какое время человек услышит эхо, если расстояние до преграды, "
+                                  "отражающей звук, 68 м? Скорость звука в воздухе 340 м/с?",
+                             reply_markup=replyMarkup)
+
+    buttons = [InlineKeyboardButton(text="Радиоволны", callback_data='right'),
+               InlineKeyboardButton(text="Инфракрасное излучение", callback_data='wrong'),
+               InlineKeyboardButton(text="Видимое излучение", callback_data='wrong'),
+               InlineKeyboardButton(text="Гамма-излучение", callback_data='wrong')]
+
+    replyMarkup = InlineKeyboardMarkup(menuBuilder(buttons, 1))
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text="Вопрос 3\nСамая длинноволновая часть шкалы электромагнитных волн – ...",
                              reply_markup=replyMarkup)
 
 
@@ -175,9 +254,9 @@ def button(update, context):
 
 
     query.answer()
-    query.delete_message()
 
     if(buttonValue == '1'):
+        query.delete_message()
         img = open('./img/about_1_1.jpg', 'rb')
         inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
             [InlineKeyboardButton(text="Кейс \"СберУниверситет\"", url="https://center-game.com/leaderclub")], 1))
@@ -216,6 +295,7 @@ def button(update, context):
         context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
 
     elif(buttonValue == '2'):
+        query.delete_message()
         img = open('./img/about_2_1.jpg', 'rb')
         inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
             [InlineKeyboardButton(text="Онлайн-лекторий юбилейного Фестиваля науки NAUKA", url="https://center-game.com/naukafest")], 1))
@@ -257,6 +337,7 @@ def button(update, context):
         context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
 
     elif (buttonValue == '3'):
+        query.delete_message()
         img = open('./img/about_3_1.jpg', 'rb')
         inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
             [InlineKeyboardButton(text="Интерактивный Атлас профессий Сбера и НИУ ВШЭ",
@@ -296,6 +377,7 @@ def button(update, context):
         context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
 
     elif (buttonValue == '4'):
+        query.delete_message()
         img = open('./img/about_4_1.jpg', 'rb')
         inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
             [InlineKeyboardButton(text="Оценка 360°, которая меняет корпоративную культуру в ESET",
@@ -322,6 +404,7 @@ def button(update, context):
         context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
 
     elif (buttonValue == '5'):
+        query.delete_message()
         img = open('./img/about_5_1.jpg', 'rb')
         inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
             [InlineKeyboardButton(text="Интерактивный зал в историческом парке на ВДНХ",
@@ -339,6 +422,20 @@ def button(update, context):
             [InlineKeyboardButton(text="Кейс М.Видео-Эльдорадо под ключ", url="https://center-game.com/mvideoacademy")],
             1))
         context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
+
+    elif (buttonValue == 'right'):
+        if(query.from_user.username in scoreBase):
+            scoreBase[query.from_user.username] += 10
+            query.edit_message_text(text="Правильно!✅", reply_markup=None)
+        else:
+            query.edit_message_text(text="Вам нужно сначала зарегистрироваться, нажав /start", reply_markup=None)
+
+
+    elif (buttonValue == 'wrong'):
+        if (query.from_user.username in scoreBase):
+            query.edit_message_text(text="Неправильно!❌", reply_markup=None)
+        else:
+            query.edit_message_text(text="Вам нужно сначала зарегистрироваться, нажав /start", reply_markup=None)
 
 
 def about(update, context):
@@ -374,7 +471,34 @@ def contact(update, context):
                                                                     "\nТелефон: \n+998 (93) 555 0210")
 
 
+def statistic(update, context):
+    text = "Вот наши лучшие пользователи👑:\n"
+    top = []
+    top = sorted(scoreBase, key=scoreBase.get)
+    top.reverse()
+    i = 1
+    # print(str(top))
+    for acc in top:
+        text += str(i) + ". "
+        text += str(acc) + "     " + str(scoreBase[acc])
+        if(i == 1):
+            text += "🥇"
+        elif(i == 2):
+            text += "🥈"
+        elif (i == 3):
+            text += "🥉"
+
+        text += "\n"
+        i += 1
+        if(i > 10):
+            break
+
+    context.bot.send_message(chat_id=update.effective_chat.id, text=str(text))
+
+
 if __name__ == '__main__':
+    scoreBase = {}
+
     global UPDATE_ID
     updater = Updater(token=TOKEN, use_context=True)
 
@@ -400,10 +524,12 @@ if __name__ == '__main__':
     backkkHandler = MessageHandler(Filters.text("Нaзaд"), kurses)
 
     kurses1Handler = MessageHandler(Filters.text("Домашнее задание"), hm_course)
-    modul11Handler = MessageHandler(Filters.text("Курc 1"), hm_course1_moduls)
-    modul22Handler = MessageHandler(Filters.text("Курc 2"), hm_course2_moduls)
-    modul33Handler = MessageHandler(Filters.text("Курc 3"), hm_course3_moduls)
+    modul11Handler = MessageHandler(Filters.text("Тест по теме \"Информационные системы в организации\""), hm_course1_test)
+    modul22Handler = MessageHandler(Filters.text("Тест по теме \"Микроэкономика\""), hm_course2_test)
+    modul33Handler = MessageHandler(Filters.text("Тест по теме \"Волновая физика\""), hm_course3_test)
     buttonHandler = CallbackQueryHandler(button)
+
+    statisticHandler = MessageHandler(Filters.text("Статистика"), statistic)
 
     echoHandler = MessageHandler(Filters.text & (~Filters.command), echo)
 
@@ -430,6 +556,9 @@ if __name__ == '__main__':
     dispatcher.add_handler(modul11Handler)
     dispatcher.add_handler(modul22Handler)
     dispatcher.add_handler(modul33Handler)
+
+    dispatcher.add_handler(statisticHandler)
+
     dispatcher.add_handler(echoHandler)
 
 
