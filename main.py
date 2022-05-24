@@ -549,7 +549,7 @@ if __name__ == '__main__':
 
     modul2Handler = MessageHandler(Filters.text("Микроэкономика"), course2_moduls)
     course_2_1_Handler = MessageHandler(Filters.text("Введение в микроэкономику"), course_2_modul_1)
-    course_2_2_Handler = MessageHandler(Filters.text("Предприятие (фирма)"), course_2_modul_2)
+    course_2_2_Handler = MessageHandler(Filters.text("Предприятие (Фирма)"), course_2_modul_2)
     course_2_3_Handler = MessageHandler(Filters.text("Издержки и доходы предприятия"), course_2_modul_3)
 
     modul3Handler = MessageHandler(Filters.text("Волновая физика"), course3_moduls)
