@@ -12,6 +12,14 @@ commands:
     type: back_button
     cmd: Назад
 
+  - name: next_test
+    type: next_button
+    cmd: Далее
+
+  - name: statistic
+    type: stat
+    cmd: Статистика
+
   - name: services
     type: default_message
     cmd: Услуги
@@ -147,6 +155,182 @@ commands:
     file: './courses/course3_3.pdf'
     prev_screen: courses
 
+  - name: cource1_test_q1
+    type: test
+    cmd: Тест по теме "Информационные системы в организации"
+    question_num: 1
+    question: "Вопрос 1\nНаиболее распространённой моделью жизненного цикла является..."
+    variants:
+      - text: 'Каскадная модель'
+        val: 'right'
+
+      - text: 'Модель параллельной разработки программных модулей'
+        val: 'wrong'
+
+      - text: 'Модель комплексного подхода к разработке ИС'
+        val: 'wrong'
+
+      - text: 'Объектно-ориентированная модель'
+        val: 'wrong'
+    prev_screen: homeworks
+    next_q: cource1_test_q2
+
+
+  - name: cource1_test_q2
+    type: test
+    cmd: Тест по теме "Информационные системы в организации" вопрос 2
+    question_num: 2
+    question: "Вопрос 2\nВ каком законе отображается объективность процесса информатизации общества?"
+    variants:
+      - text: 'Закон убывающей доходности '
+        val: 'wrong'
+
+      - text: 'Закон циклического развития общества'
+        val: 'wrong'
+
+      - text: 'Закон “необходимого разнообразия" '
+        val: 'right'
+
+      - text: 'Закон единства и борьбы противоположностей'
+        val: 'wrong'
+    prev_screen: homeworks
+    next_q: cource1_test_q3
+
+  - name: cource1_test_q3
+    type: test
+    cmd: Тест по теме "Информационные системы в организации" вопрос 3
+    question_num: 3
+    question: "Вопрос 3\n Информация-это?"
+    variants:
+      - text: 'Cообщения, находящиеся в памяти компьютера'
+        val: 'wrong'
+
+      - text: 'Cообщения, находящиеся в хранилищах данных'
+        val: 'wrong'
+
+      - text: 'Предварительно обработанные данные, годные для принятия управленческих решений'
+        val: 'right'
+
+      - text: 'Сообщения, зафиксированные на машинных носителях'
+        val: 'wrong'
+    prev_screen: homeworks
+
+  - name: cource2_test_q1
+    type: test
+    cmd: Тест по теме "Микроэкономика"
+    question_num: 1
+    question: "Вопрос 1\nНаиболее глубокий и полный анализ кардинально новых моментов несовершенной конкуренции был дан"
+    variants:
+      - text: 'Джоан Робинсон'
+        val: 'right'
+
+      - text: 'Адамом Смитом'
+        val: 'wrong'
+
+      - text: 'Джоном Кейнсом'
+        val: 'wrong'
+
+      - text: 'Альфредом Маршаллом'
+        val: 'wrong'
+    prev_screen: homeworks
+    next_q: cource2_test_q2
+
+  - name: cource2_test_q2
+    type: test
+    cmd: Тест по теме "Микроэкономика" вопрос 2
+    question_num: 2
+    question: "Вопрос 2\nВ коротком периоде фирма с целью максимизировать прибыль или минимизировать убытки не должна производить товар, если"
+    variants:
+      - text: 'Минимальные средние издержки меньше, чем предельные издержки'
+        val: 'wrong'
+
+      - text: 'Цена меньше, чем минимальные средние переменные издержки'
+        val: 'right'
+
+      - text: 'Цена меньше, чем средние постоянные издержки'
+        val: 'wrong'
+
+      - text: 'Цена меньше, чем минимальные переменные издержки'
+        val: 'wrong'
+    prev_screen: homeworks
+    next_q: cource2_test_q3
+
+  - name: cource2_test_q3
+    type: test
+    cmd: Тест по теме "Микроэкономика" вопрос 3
+    question_num: 3
+    question: "Вопрос 3\nПо мнению неоклассиков..."
+    variants:
+      - text: 'Равновесие рынка труда нарушается из-за влияния профсоюзов'
+        val: 'wrong'
+
+      - text: 'Безработица характеризуется «естественным» уровнем'
+        val: 'wrong'
+
+      - text: 'Безработица препятствует нормальному функционированию рынка труда'
+        val: 'wrong'
+
+      - text: 'Безработица невозможна, если на рынке труда существует равновесие'
+        val: 'right'
+    prev_screen: homeworks
+
+  - name: cource3_test_q1
+    type: test
+    cmd: Тест по теме "Волновая физика"
+    question_num: 1
+    question: "Вопрос 1\nУльтразвуковыми называются колебания, частота которых ..."
+    variants:
+      - text: 'Менее 20 Гц '
+        val: 'wrong'
+
+      - text: 'От 20 до 20 000 Гц'
+        val: 'wrong'
+
+      - text: 'Превышает 20 000 Гц'
+        val: 'right'
+    prev_screen: homeworks
+    next_q: cource3_test_q2
+
+  - name: cource3_test_q2
+    type: test
+    cmd: Тест по теме "Волновая физика" вопрос 2
+    question_num: 2
+    question: "Вопрос 2\nЧерез какое время человек услышит эхо, если расстояние до преграды, отражающей звук, 68 м? Скорость звука в воздухе 340 м/с"
+    variants:
+      - text: '0,4 с'
+        val: 'right'
+
+      - text: '0,2 c'
+        val: 'wrong'
+
+      - text: '0,1 c'
+        val: 'wrong'
+
+      - text: '0,7 c'
+        val: 'wrong'
+
+    prev_screen: homeworks
+    next_q: cource3_test_q3
+
+  - name: cource3_test_q3
+    type: test
+    cmd: Тест по теме "Волновая физика" вопрос 2
+    question_num: 3
+    question: "Вопрос 3\nСамая длинноволновая часть шкалы электромагнитных волн – ..."
+    variants:
+      - text: 'Радиоволны'
+        val: 'right'
+
+      - text: 'Инфракрасное излучение'
+        val: 'wrong'
+
+      - text: 'Видимое излучение'
+        val: 'wrong'
+
+      - text: 'Гамма-излучение'
+        val: 'wrong'
+
+    prev_screen: homeworks
 
 buttons:
 
