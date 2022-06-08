@@ -23,6 +23,7 @@ class App(object):
 
         for cmd in self.config['commands']:
             match cmd['type']:
+
                 case 'interactive_command':
                     handler = CommandHandler(cmd['cmd'], self.make_cmd(cmd))
                     dispatcher.add_handler(handler)
@@ -38,7 +39,12 @@ class App(object):
                     dispatcher.add_handler(handler)
                     logging.info("added command %s", cmd['name'])
 
-        buttonHandler = CallbackQueryHandler(button)
+                case 'back_button':
+                    handler = MessageHandler(Filters.text(cmd['cmd']), self.make_back_button(cmd))
+                    dispatcher.add_handler(handler)
+                    logging.info("added back command")
+
+        buttonHandler = CallbackQueryHandler(self.button)
         echoHandler = MessageHandler(Filters.text & (~Filters.command), echo)
 
         dispatcher.add_handler(buttonHandler)
@@ -69,7 +75,6 @@ class App(object):
 
     def make_file_cb(self, cmd):
         def callback_func(upd, ctx):
-            self.last_command[upd.message.from_user.username] = cmd['name']
             logging.info('user %s cmd %s', upd.message.from_user.username, cmd['name'])
             filename = open(cmd['file'], 'rb')
             ctx.bot.send_document(upd.effective_chat.id, filename)
@@ -77,22 +82,181 @@ class App(object):
         return callback_func
 
     def make_cmd(self, cmd):
-        def callback_funk(upd, ctx):
-            msg = ''
-            for txt in cmd['text']:
-                match txt:
-                    case '{username}':
-                        msg += upd.message.from_user.first_name
-                    case _:
-                        msg += txt
+        if cmd.get('callback_data', False):
+            if (cmd.get('url', False)):
+                replyMarkup = InlineKeyboardMarkup(
+                    menuBuilder([InlineKeyboardButton(x, url=str(i)) for i, x in
+                                 zip(cmd['callback_data'], cmd['buttons'])], cmd['buttons_count']))
+            else:
+                replyMarkup = InlineKeyboardMarkup(
+                    menuBuilder([InlineKeyboardButton(x, callback_data=str(i)) for i, x in
+                        zip(cmd['callback_data'], cmd['buttons'])], cmd['buttons_count']))
+        else:
+            replyMarkup = ReplyKeyboardMarkup(
+                menuBuilder([KeyboardButton(x) for x in cmd['buttons']], cmd['buttons_count']))
 
-            ctx.bot.send_message(chat_id=upd.effective_chat.id, text=msg)
+        def callback_funk(upd, ctx):
+            text = cmd['text'].format(msg=upd.message)
+            ctx.bot.send_message(chat_id=upd.effective_chat.id, text=text, reply_markup=replyMarkup)
+
+        return callback_funk
+
+    def make_back_button(self, cmd):
+        def callback_funk(upd, ctx):
+            last_menu = {}
+            for c in self.config['commands']:
+                if c['name'] == self.last_command[upd.message.from_user.username]:
+                    last_screen_name = c['prev_screen']
+                    break
+
+            for c in self.config['commands']:
+                if c['name'] == last_screen_name:
+                    last_menu = c
+                    break
+
+            self.last_command[upd.message.from_user.username] = last_screen_name
+            replyMarkup = ReplyKeyboardMarkup(
+                menuBuilder([KeyboardButton(x) for x in last_menu['buttons']], last_menu['buttons_count']))
+
+            text = last_menu['text'].format(msg=upd.message)
+            ctx.bot.send_message(chat_id=upd.effective_chat.id, text=text, reply_markup=replyMarkup)
 
         return callback_funk
 
     def user_init(self, username):
         if username not in self.score_base.keys():
             self.score_base[username] = 0
+
+    def button(self, update, context):
+        query = update.callback_query
+        buttonValue = query.data
+
+        query.answer()
+
+        for btn in self.config['buttons']:
+            if btn['button_value'] == buttonValue:
+                match btn['type']:
+                    case 'ads':
+                        query.delete_message()
+                        for msg in btn['messages']:
+                            img = open(msg['img'], 'rb')
+                            inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
+                                [InlineKeyboardButton(text=msg['text'],
+                                                      url=msg['url'])], 1))
+                            context.bot.send_photo(chat_id=update.effective_chat.id, photo=img,
+                                                   reply_markup=inlineReplyMarkup)
+
+                    case 'test_wrong':
+                        query.edit_message_text(text=msg['text'], reply_markup=None)
+
+                    case 'test_right':
+                        query.edit_message_text(text=msg['text'], reply_markup=None)
+
+
+        #
+        # elif (buttonValue == '3'):
+        #     query.delete_message()
+        #     img = open('./img/about_3_1.jpg', 'rb')
+        #     inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
+        #         [InlineKeyboardButton(text="Интерактивный Атлас профессий Сбера и НИУ ВШЭ",
+        #                               url="https://center-game.com/sber_atlas")], 1))
+        #     context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
+        #
+        #     img = open('./img/about_3_2.jpg', 'rb')
+        #     inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
+        #         [InlineKeyboardButton(
+        #             text="Как объяснить работу эндаумент-фонда через настольную игру — в кейсе эндаумента МФТИ",
+        #             url="https://center-game.com/mipt_endowment")], 1))
+        #     context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
+        #
+        #     img = open('./img/about_3_3.jpg', 'rb')
+        #     inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
+        #         [InlineKeyboardButton(text="17 видеоуроков о личной миссии «Путь самурая» для российского ESET",
+        #                               url="https://center-game.com/esetsamurai")],
+        #         1))
+        #     context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
+        #
+        #     img = open('./img/about_3_4.jpg', 'rb')
+        #     inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
+        #         [InlineKeyboardButton(
+        #             text="Как сделать профориентацию интересной для школьников — в кейсе «Билета в Будущее»",
+        #             url="https://center-game.com/biletvbuduschee")], 1))
+        #     context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
+        #
+        #     img = open('./img/about_3_5.jpg', 'rb')
+        #     inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
+        #         [InlineKeyboardButton(
+        #             text="Игра «Лабиринт» для введения в ТРИЗ",
+        #             url="https://center-game.com/labirint")], 1))
+        #     context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
+        #
+        #     img = open('./img/about_3_6.jpg', 'rb')
+        #     inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
+        #         [InlineKeyboardButton(text="Интерактивный квиз о защите данных",
+        #                               url="https://center-game.com/bernache")], 1))
+        #     context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
+        #
+        # elif (buttonValue == '4'):
+        #     query.delete_message()
+        #     img = open('./img/about_4_1.jpg', 'rb')
+        #     inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
+        #         [InlineKeyboardButton(text="Оценка 360°, которая меняет корпоративную культуру в ESET",
+        #                               url="https://center-game.com/eset")], 1))
+        #     context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
+        #
+        #     img = open('./img/about_4_2.jpg', 'rb')
+        #     inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
+        #         [InlineKeyboardButton(text="Развитие навыков работы c клиентами у инженеров DataLine",
+        #                               url="https://center-game.com/dataline ")], 1))
+        #     context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
+        #
+        #     img = open('./img/about_4_3.jpg', 'rb')
+        #     inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
+        #         [InlineKeyboardButton(text="Новая схема коммуникаций для операционного департамента Faberlic",
+        #                               url="https://center-game.com/faberlic")],
+        #         1))
+        #     context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
+        #
+        #     img = open('./img/about_4_4.jpg', 'rb')
+        #     inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
+        #         [InlineKeyboardButton(text="Курс по управлению людьми, проектами и собой для МИСиС",
+        #                               url="https://center-game.com/misis")], 1))
+        #     context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
+        #
+        # elif (buttonValue == '5'):
+        #     query.delete_message()
+        #     img = open('./img/about_5_1.jpg', 'rb')
+        #     inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
+        #         [InlineKeyboardButton(text="Интерактивный зал в историческом парке на ВДНХ",
+        #                               url="https://center-game.com/histpark")], 1))
+        #     context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
+        #
+        #     img = open('./img/about_3_1.jpg', 'rb')
+        #     inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
+        #         [InlineKeyboardButton(text="Интерактивный Атлас профессий Сбера и НИУ ВШЭ",
+        #                               url="https://center-game.com/sber_atlas")], 1))
+        #     context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
+        #
+        #     img = open('./img/about_1_3.jpg', 'rb')
+        #     inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
+        #         [InlineKeyboardButton(text="Кейс М.Видео-Эльдорадо под ключ",
+        #                               url="https://center-game.com/mvideoacademy")],
+        #         1))
+        #     context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
+        #
+        # elif (buttonValue == 'right'):
+        #     if (query.from_user.username in scoreBase):
+        #         scoreBase[query.from_user.username] += 10
+        #         query.edit_message_text(text="Правильно!✅", reply_markup=None)
+        #     else:
+        #         query.edit_message_text(text="Вам нужно сначала зарегистрироваться, нажав /start", reply_markup=None)
+        #
+        #
+        # elif (buttonValue == 'wrong'):
+        #     if (query.from_user.username in scoreBase):
+        #         query.edit_message_text(text="Неправильно!❌", reply_markup=None)
+        #     else:
+        #         query.edit_message_text(text="Вам нужно сначала зарегистрироваться, нажав /start", reply_markup=None)
 
 
 def menuBuilder(buttons, n_cols, headerButtons=None, footerButtons=None):
@@ -219,202 +383,6 @@ def hm_course3_test(update, context):
                              reply_markup=replyMarkup)
 
 
-def button(update, context):    #foreach cb_value foreach file/cb
-    query = update.callback_query
-    buttonValue = query.data
-
-    query.answer()
-
-    if (buttonValue == '1'):
-        query.delete_message()
-        img = open('./img/about_1_1.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(text="Кейс \"СберУниверситет\"", url="https://center-game.com/leaderclub")], 1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-        img = open('./img/about_1.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(text="Кейс НПФ \"Эволюция\"", url="https://center-game.com/npfevolution")], 1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-        img = open('./img/about_1_3.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(text="Кейс М.Видео-Эльдорадо под ключ", url="https://center-game.com/mvideoacademy")],
-            1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-        img = open('./img/about_1_4.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(text="Кейс Лидер-клуба СберУниверсита",
-                                  url="https://center-game.com/case_leaderclub2")], 1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-        img = open('./img/about_1_5.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(text="Центр управления мотивацие для 2,5 тысяч трейдеров",
-                                  url="https://center-game.com/traders")], 1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-        img = open('./img/about_1_6.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(text="Центр управления мотивацией для марафона от «Преактум»",
-                                  url="https://center-game.com/preactum")], 1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-        img = open('./img/about_1_7.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(text="Центр управления мотивацией для «Техавтоцентра»",
-                                  url="https://center-game.com/tac")], 1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-    elif (buttonValue == '2'):
-        query.delete_message()
-        img = open('./img/about_2_1.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(text="Онлайн-лекторий юбилейного Фестиваля науки NAUKA",
-                                  url="https://center-game.com/naukafest")], 1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-        img = open('./img/about_2_2.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(text="Как превратить IT-конференцию в роман Нила Геймана — на примере Ростелекома",
-                                  url="https://center-game.com/rtk_friday13")], 1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-        img = open('./img/about_2_3.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(text="Платформа для онлайн-форума АНО «Россия — страна возможностей»",
-                                  url="https://center-game.com/zavtraforum")],
-            1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-        img = open('./img/about_2_4.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(text="Онлайн-платформа конференции «АРТtalk»",
-                                  url="https://center-game.com/arttalk")], 1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-        img = open('./img/about_2_5.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(
-                text="Первая конференция о социальном спорте для Благотворительного фонда Владимира Потанина",
-                url="https://center-game.com/potanin_conf")], 1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-        img = open('./img/about_2_6.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(text="Платформа онлайн-форума iВолга для Самарской области",
-                                  url="https://center-game.com/ivolga")], 1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-        img = open('./img/about_2_7.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(text="Как удержать внимание на 6-часовой онлайн-конференции",
-                                  url="https://center-game.com/edfest")], 1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-    elif (buttonValue == '3'):
-        query.delete_message()
-        img = open('./img/about_3_1.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(text="Интерактивный Атлас профессий Сбера и НИУ ВШЭ",
-                                  url="https://center-game.com/sber_atlas")], 1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-        img = open('./img/about_3_2.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(
-                text="Как объяснить работу эндаумент-фонда через настольную игру — в кейсе эндаумента МФТИ",
-                url="https://center-game.com/mipt_endowment")], 1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-        img = open('./img/about_3_3.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(text="17 видеоуроков о личной миссии «Путь самурая» для российского ESET",
-                                  url="https://center-game.com/esetsamurai")],
-            1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-        img = open('./img/about_3_4.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(
-                text="Как сделать профориентацию интересной для школьников — в кейсе «Билета в Будущее»",
-                url="https://center-game.com/biletvbuduschee")], 1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-        img = open('./img/about_3_5.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(
-                text="Игра «Лабиринт» для введения в ТРИЗ",
-                url="https://center-game.com/labirint")], 1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-        img = open('./img/about_3_6.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(text="Интерактивный квиз о защите данных",
-                                  url="https://center-game.com/bernache")], 1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-    elif (buttonValue == '4'):
-        query.delete_message()
-        img = open('./img/about_4_1.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(text="Оценка 360°, которая меняет корпоративную культуру в ESET",
-                                  url="https://center-game.com/eset")], 1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-        img = open('./img/about_4_2.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(text="Развитие навыков работы c клиентами у инженеров DataLine",
-                                  url="https://center-game.com/dataline ")], 1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-        img = open('./img/about_4_3.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(text="Новая схема коммуникаций для операционного департамента Faberlic",
-                                  url="https://center-game.com/faberlic")],
-            1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-        img = open('./img/about_4_4.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(text="Курс по управлению людьми, проектами и собой для МИСиС",
-                                  url="https://center-game.com/misis")], 1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-    elif (buttonValue == '5'):
-        query.delete_message()
-        img = open('./img/about_5_1.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(text="Интерактивный зал в историческом парке на ВДНХ",
-                                  url="https://center-game.com/histpark")], 1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-        img = open('./img/about_3_1.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(text="Интерактивный Атлас профессий Сбера и НИУ ВШЭ",
-                                  url="https://center-game.com/sber_atlas")], 1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-        img = open('./img/about_1_3.jpg', 'rb')
-        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-            [InlineKeyboardButton(text="Кейс М.Видео-Эльдорадо под ключ", url="https://center-game.com/mvideoacademy")],
-            1))
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img, reply_markup=inlineReplyMarkup)
-
-    elif (buttonValue == 'right'):
-        if (query.from_user.username in scoreBase):
-            scoreBase[query.from_user.username] += 10
-            query.edit_message_text(text="Правильно!✅", reply_markup=None)
-        else:
-            query.edit_message_text(text="Вам нужно сначала зарегистрироваться, нажав /start", reply_markup=None)
-
-
-    elif (buttonValue == 'wrong'):
-        if (query.from_user.username in scoreBase):
-            query.edit_message_text(text="Неправильно!❌", reply_markup=None)
-        else:
-            query.edit_message_text(text="Вам нужно сначала зарегистрироваться, нажав /start", reply_markup=None)
 
 
 def statistic(update, context):
