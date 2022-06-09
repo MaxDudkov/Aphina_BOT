@@ -11,14 +11,13 @@ TOKEN = '5290614906:AAGYFaOjyqukQHJDwBiLfpHih-xSmS0smx4'
 
 class Context(object):
     def __init__(self):
-        self.state = ""
+        self.state = {'game': 'default'}
         self.last_command = ""
         self.score = 0
         self.nickname = ""
-        self.gallows_word = {}
 
-    def get_gallow_word(self):
-        return self.gallows_word
+    def set_state(self, key, state):
+        self.state[key] = state
 
     def set_gallow_word(self, word):
         self.gallows_word = word
@@ -40,9 +39,6 @@ class Context(object):
 
     def get_state(self):
         return self.state
-
-    def set_state(self, state):
-        self.state = state
 
 
 class App(object):
@@ -80,7 +76,7 @@ class App(object):
                 handler = CommandHandler(Filters.text(cmd['cmd']), maker(cmd))
 
             else:
-                handler = MessageHandler(Filters.text(cmd['cmd']), maker(cmd))
+                handler = MessageHandler(Filters.text([cmd['cmd']]), maker(cmd))
 
             dispatcher.add_handler(handler)
             logging.info("added handler %s", cmd['type'])
@@ -211,8 +207,10 @@ class App(object):
             buttons.append(InlineKeyboardButton(text=vrnt['text'], callback_data=vrnt['val']))
 
         reply_markup = InlineKeyboardMarkup(menuBuilder(buttons, 1))
+        next_reply_markup = ReplyKeyboardMarkup(menuBuilder([KeyboardButton("Далее")], 1))
 
         def callback_funk(upd, ctx):
+            ctx.bot.send_message(chat_id=upd.effective_chat.id, text="Вы запустили тест:\n" + cmd['cmd'], reply_markup=next_reply_markup)
             self.get_context(upd.message.from_user.id, upd.message.from_user.username).set_last_command(cmd['name'])
             ctx.bot.send_message(chat_id=upd.effective_chat.id, text=cmd['question'], reply_markup=reply_markup)
 
@@ -243,16 +241,10 @@ class App(object):
             ctx.bot.send_message(chat_id=upd.effective_chat.id, text=str(text))
         return callback_funk
 
-    def make_game_dice(self, cmd):
+    def make_game(self, cmd):
         def callback_funk(upd, ctx):
             ctx.bot.send_message(chat_id=upd.effective_chat.id, text=cmd['text'], reply_markup=None)
-            self.get_context(upd.message.from_user.id, upd.message.from_user.username).state = cmd['state_code']
-        return callback_funk
-
-    def make_game_gallows(self, cmd):
-        def callback_funk(upd, ctx):
-            ctx.bot.send_message(chat_id=upd.effective_chat.id, text=cmd['text'], reply_markup=None)
-            self.get_context(upd.message.from_user.id, upd.message.from_user.username).state = cmd['state_code']
+            self.get_context(upd.message.from_user.id, upd.message.from_user.username).set_state('game', cmd['state_code'])
         return callback_funk
 
     def button(self, update, context):
@@ -291,20 +283,9 @@ class App(object):
         def callback_funk(update, context):
             user_context = self.get_context(update.message.from_user.id)
             for state in self.games.keys():
-                if user_context.state == state:
-                    try:
-                        bet = int(update.message.text)
-                    except Exception:
-                        context.bot.send_message(chat_id=update.effective_chat.id, text="Вы ввели не число :(\nПопробуйте еще раз!")
+                if user_context.state['game'] == state:
+                        self.games[state].process(update, context, user_context, update.message.text)
                         return
-
-                    if bet > user_context.score:
-                        context.bot.send_message(chat_id=update.effective_chat.id,
-                                                 text="У вас нет столько очков, ведите сумму поменьше!")
-                    else:
-                        coef = self.games[state].process(update, context, user_context, bet)
-                        user_context.set_state('default')
-                    return
 
             if update.message:
                 if update.message.text:
