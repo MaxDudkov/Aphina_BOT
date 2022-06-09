@@ -79,7 +79,7 @@ class App(object):
                 handler = MessageHandler(Filters.text([cmd['cmd']]), maker(cmd))
 
             dispatcher.add_handler(handler)
-            logging.info("added handler %s", cmd['type'])
+            logging.info("added handler %s", cmd['cmd'])
 
         buttonHandler = CallbackQueryHandler(self.button)
         echoHandler = MessageHandler(Filters.text & (~Filters.command), self.get_echo())
@@ -167,6 +167,7 @@ class App(object):
         def callback_funk(upd, ctx):
             next_q = {}
             exit = False
+            last_test_q = 'cource3_test_q1'
             for c in self.config['commands']:
                 if (c['name'] == self.get_context(upd.message.from_user.id, upd.message.from_user.username).get_last_command()) and (c['type'] == 'test'):
                     if c.get('next_q', False):

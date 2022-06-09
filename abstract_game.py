@@ -146,9 +146,6 @@ class GallowsGame(AbstractGame):
                         ctx.bot.send_message(chat_id=upd.effective_chat.id, text="Вы проиграли :(")
                         user_ctx.set_state('game', 'default')
 
-
-
-
             if self.is_guessed(word):
                 ctx.bot.send_message(chat_id=upd.effective_chat.id, text="Вы выйграли!")
                 user_ctx.set_state('game', 'default')
