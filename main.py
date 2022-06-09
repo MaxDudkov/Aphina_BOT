@@ -4,16 +4,65 @@ from telegram.ext import Updater
 import yaml
 import logging
 
+from abstract_game import DiceGame, GallowsGame
+
 TOKEN = '5290614906:AAGYFaOjyqukQHJDwBiLfpHih-xSmS0smx4'
+
+
+class Context(object):
+    def __init__(self):
+        self.state = ""
+        self.last_command = ""
+        self.score = 0
+        self.nickname = ""
+        self.gallows_word = {}
+
+    def get_gallow_word(self):
+        return self.gallows_word
+
+    def set_gallow_word(self, word):
+        self.gallows_word = word
+
+    def get_last_command(self):
+        return self.last_command
+
+    def set_last_command(self, last_command):
+        self.last_command = last_command
+
+    def get_score(self):
+        return self.score
+
+    def add_score(self, score):
+        self.score += score
+
+    def set_score(self, score):
+        self.score = score
+
+    def get_state(self):
+        return self.state
+
+    def set_state(self, state):
+        self.state = state
 
 
 class App(object):
     def __init__(self, token):
         self.config = None
         self.token = token
-        self.score_base = {}
-        self.last_command = {}
+        self.data_base = {}
+        self.games = {"state_dice": DiceGame(), 'state_gallows': GallowsGame()}
         logging.basicConfig(level=logging.DEBUG)
+
+    def get_context(self, username, nickname=None):
+        if username in self.data_base:
+            return self.data_base[username]
+
+        else:
+            ctx = Context()
+            if nickname:
+                ctx.nickname = nickname
+            self.data_base[username] = ctx
+            return ctx
 
     def run(self):
         updater = Updater(token=self.token, use_context=True)
@@ -22,54 +71,31 @@ class App(object):
         self.config = yaml.safe_load(open('config.yml'))
 
         for cmd in self.config['commands']:
-            match cmd['type']:
+            if "make_" + cmd['type'] not in dir(self):
+                logging.error("cant find method " + "make_" + cmd['type'])
+                return
 
-                case 'interactive_command':
-                    handler = CommandHandler(cmd['cmd'], self.make_cmd(cmd))
-                    dispatcher.add_handler(handler)
-                    logging.info("added /command %s", cmd['name'])
+            maker = getattr(self, "make_" + cmd['type'])
+            if cmd.get('command_handler', False):
+                handler = CommandHandler(Filters.text(cmd['cmd']), maker(cmd))
 
-                case 'file':
-                    handler = MessageHandler(Filters.text(cmd['cmd']), self.make_file_cb(cmd))
-                    dispatcher.add_handler(handler)
-                    logging.info("added file command %s", cmd['name'])
+            else:
+                handler = MessageHandler(Filters.text(cmd['cmd']), maker(cmd))
 
-                case 'default_message':
-                    handler = MessageHandler(Filters.text(cmd['cmd']), self.make_cb(cmd))
-                    dispatcher.add_handler(handler)
-                    logging.info("added command %s", cmd['name'])
-
-                case 'back_button':
-                    handler = MessageHandler(Filters.text(cmd['cmd']), self.make_back_button(cmd))
-                    dispatcher.add_handler(handler)
-                    logging.info("added back command")
-
-                case 'next_button':
-                    handler = MessageHandler(Filters.text(cmd['cmd']), self.make_next_button(cmd))
-                    dispatcher.add_handler(handler)
-                    logging.info("added next command")
-
-                case 'test':
-                    handler = MessageHandler(Filters.text(cmd['cmd']), self.make_test(cmd))
-                    dispatcher.add_handler(handler)
-                    logging.info("added test %s", cmd['name'])
-
-                case 'stat':
-                    handler = MessageHandler(Filters.text(cmd['cmd']), self.make_stat(cmd))
-                    dispatcher.add_handler(handler)
-                    logging.info("added test %s", cmd['name'])
+            dispatcher.add_handler(handler)
+            logging.info("added handler %s", cmd['type'])
 
         buttonHandler = CallbackQueryHandler(self.button)
-        echoHandler = MessageHandler(Filters.text & (~Filters.command), echo)
+        echoHandler = MessageHandler(Filters.text & (~Filters.command), self.get_echo())
 
         dispatcher.add_handler(buttonHandler)
         dispatcher.add_handler(echoHandler)
 
         updater.start_polling()
 
-    def make_cb(self, cmd):
+    def make_default_message(self, cmd):
         if cmd.get('callback_data', False):
-            if (cmd.get('url', False)):
+            if cmd.get('url', False):
                 replyMarkup = InlineKeyboardMarkup(
                     menuBuilder([InlineKeyboardButton(x, url=str(i)) for i, x in
                                  zip(cmd['callback_data'], cmd['buttons'])], cmd['buttons_count']))
@@ -82,24 +108,24 @@ class App(object):
                 menuBuilder([KeyboardButton(x) for x in cmd['buttons']], cmd['buttons_count']))
 
         def callback_func(upd, ctx):
-            self.last_command[upd.message.from_user.username] = cmd['name']
-            logging.info('user %s cmd %s', upd.message.from_user.username, cmd['name'])
+            self.get_context(upd.message.from_user.id, upd.message.from_user.username).set_last_command(cmd['name'])
+            logging.info('user %s cmd %s', upd.message.from_user.id, cmd['name'])
             ctx.bot.send_message(chat_id=upd.effective_chat.id, text=cmd['text'], reply_markup=replyMarkup)
 
         return callback_func
 
-    def make_file_cb(self, cmd):
+    def make_file(self, cmd):
         def callback_func(upd, ctx):
-            self.last_command[upd.message.from_user.username] = cmd['name']
-            logging.info('user %s cmd %s', upd.message.from_user.username, cmd['name'])
+            self.get_context(upd.message.from_user.id, upd.message.from_user.username).set_last_command(cmd['name'])
+            logging.info('user %s cmd %s', upd.message.from_user.id, cmd['name'])
             filename = open(cmd['file'], 'rb')
             ctx.bot.send_document(upd.effective_chat.id, filename)
 
         return callback_func
 
-    def make_cmd(self, cmd):
+    def make_interactive_command(self, cmd):
         if cmd.get('callback_data', False):
-            if (cmd.get('url', False)):
+            if cmd.get('url', False):
                 replyMarkup = InlineKeyboardMarkup(
                     menuBuilder([InlineKeyboardButton(x, url=str(i)) for i, x in
                                  zip(cmd['callback_data'], cmd['buttons'])], cmd['buttons_count']))
@@ -112,7 +138,7 @@ class App(object):
                 menuBuilder([KeyboardButton(x) for x in cmd['buttons']], cmd['buttons_count']))
 
         def callback_funk(upd, ctx):
-            self.last_command[upd.message.from_user.username] = cmd['name']
+            self.get_context(upd.message.from_user.id, upd.message.from_user.username).set_last_command(cmd['name'])
             text = cmd['text'].format(msg=upd.message)
             ctx.bot.send_message(chat_id=upd.effective_chat.id, text=text, reply_markup=replyMarkup)
 
@@ -121,8 +147,9 @@ class App(object):
     def make_back_button(self, cmd):
         def callback_funk(upd, ctx):
             last_menu = {}
+            last_screen_name = "start"
             for c in self.config['commands']:
-                if c['name'] == self.last_command[upd.message.from_user.username]:
+                if c['name'] == self.get_context(upd.message.from_user.id, upd.message.from_user.username).get_last_command():
                     last_screen_name = c['prev_screen']
                     break
 
@@ -131,7 +158,7 @@ class App(object):
                     last_menu = c
                     break
 
-            self.last_command[upd.message.from_user.username] = last_screen_name
+            self.get_context(upd.message.from_user.id, upd.message.from_user.username).set_last_command(last_screen_name)
             replyMarkup = ReplyKeyboardMarkup(
                 menuBuilder([KeyboardButton(x) for x in last_menu['buttons']], last_menu['buttons_count']))
 
@@ -145,7 +172,7 @@ class App(object):
             next_q = {}
             exit = False
             for c in self.config['commands']:
-                if (c['name'] == self.last_command[upd.message.from_user.username]) and (c['type'] == 'test'):
+                if (c['name'] == self.get_context(upd.message.from_user.id, upd.message.from_user.username).get_last_command()) and (c['type'] == 'test'):
                     if c.get('next_q', False):
                         last_test_q = c['next_q']
                     else:
@@ -153,14 +180,14 @@ class App(object):
                         exit = True
                         last_test_q = c['prev_screen']
                     break
-            print(last_test_q)
+            # print(last_test_q)
             for c in self.config['commands']:
                 if c['name'] == last_test_q:
                     next_q = c
                     break
 
-            self.last_command[upd.message.from_user.username] = last_test_q
-            if(exit):
+            self.get_context(upd.message.from_user.id, upd.message.from_user.username).set_last_command(last_test_q)
+            if exit:
                 replyMarkup = ReplyKeyboardMarkup(
                     menuBuilder([KeyboardButton(x) for x in next_q['buttons']], next_q['buttons_count']))
 
@@ -186,7 +213,7 @@ class App(object):
         reply_markup = InlineKeyboardMarkup(menuBuilder(buttons, 1))
 
         def callback_funk(upd, ctx):
-            self.last_command[upd.message.from_user.username] = cmd['name']
+            self.get_context(upd.message.from_user.id, upd.message.from_user.username).set_last_command(cmd['name'])
             ctx.bot.send_message(chat_id=upd.effective_chat.id, text=cmd['question'], reply_markup=reply_markup)
 
         return callback_funk
@@ -195,13 +222,12 @@ class App(object):
         def callback_funk(upd, ctx):
             text = "Вот наши лучшие пользователи👑:\n"
             top = []
-            top = sorted(self.score_base, key=self.score_base.get)
-            top.reverse()
+            top = sorted(self.data_base.values(), key=lambda x: x.score, reverse=True)
             i = 1
-            # print(str(top))
+            print(str(top))
             for acc in top:
                 text += str(i) + ". "
-                text += str(acc) + "     " + str(self.score_base[acc])
+                text += str(acc.nickname) + "     " + str(acc.get_score())
                 if (i == 1):
                     text += "🥇"
                 elif (i == 2):
@@ -217,9 +243,17 @@ class App(object):
             ctx.bot.send_message(chat_id=upd.effective_chat.id, text=str(text))
         return callback_funk
 
-    def user_init(self, username):
-        if username not in self.score_base.keys():
-            self.score_base[username] = 0
+    def make_game_dice(self, cmd):
+        def callback_funk(upd, ctx):
+            ctx.bot.send_message(chat_id=upd.effective_chat.id, text=cmd['text'], reply_markup=None)
+            self.get_context(upd.message.from_user.id, upd.message.from_user.username).state = cmd['state_code']
+        return callback_funk
+
+    def make_game_gallows(self, cmd):
+        def callback_funk(upd, ctx):
+            ctx.bot.send_message(chat_id=upd.effective_chat.id, text=cmd['text'], reply_markup=None)
+            self.get_context(upd.message.from_user.id, upd.message.from_user.username).state = cmd['state_code']
+        return callback_funk
 
     def button(self, update, context):
         query = update.callback_query
@@ -246,14 +280,37 @@ class App(object):
                         context.bot.send_message(chat_id=update.effective_chat.id, text="Идем дальше ?", reply_markup=reply_markup)
 
                     case 'test_right':
-                        if query.from_user.username in self.score_base.keys():
-                            self.score_base[query.from_user.username] += 10
-                        else:
-                            self.score_base[query.from_user.username] = 10
+                        score = self.get_context(query.from_user.id).get_score()
+                        self.get_context(query.from_user.id).set_score(score + 10)
 
                         reply_markup = ReplyKeyboardMarkup(menuBuilder([KeyboardButton("Далее")], 1))
                         query.edit_message_text(text=btn['message'], reply_markup=None)
                         context.bot.send_message(chat_id=update.effective_chat.id, text="Идем дальше ?", reply_markup=reply_markup)
+
+    def get_echo(self):
+        def callback_funk(update, context):
+            user_context = self.get_context(update.message.from_user.id)
+            for state in self.games.keys():
+                if user_context.state == state:
+                    try:
+                        bet = int(update.message.text)
+                    except Exception:
+                        context.bot.send_message(chat_id=update.effective_chat.id, text="Вы ввели не число :(\nПопробуйте еще раз!")
+                        return
+
+                    if bet > user_context.score:
+                        context.bot.send_message(chat_id=update.effective_chat.id,
+                                                 text="У вас нет столько очков, ведите сумму поменьше!")
+                    else:
+                        coef = self.games[state].process(update, context, user_context, bet)
+                        user_context.set_state('default')
+                    return
+
+            if update.message:
+                if update.message.text:
+                    update.message.reply_text(f'Я пока не знаю, что на это ответить :(')
+
+        return callback_funk
 
 
 def menuBuilder(buttons, n_cols, headerButtons=None, footerButtons=None):
@@ -266,39 +323,6 @@ def menuBuilder(buttons, n_cols, headerButtons=None, footerButtons=None):
         menu.append([footerButtons])
 
     return menu
-
-
-def echo(update, context):
-    if update.message:
-        if update.message.text:
-            update.message.reply_text(f'Я пока не знаю, что на это ответить :(')
-
-
-
-# def statistic(update, context):
-#     text = "Вот наши лучшие пользователи👑:\n"
-#     top = []
-#     top = sorted(scoreBase, key=scoreBase.get)
-#     top.reverse()
-#     i = 1
-#     # print(str(top))
-#     for acc in top:
-#         text += str(i) + ". "
-#         text += str(acc) + "     " + str(scoreBase[acc])
-#         if (i == 1):
-#             text += "🥇"
-#         elif (i == 2):
-#             text += "🥈"
-#         elif (i == 3):
-#             text += "🥉"
-#
-#         text += "\n"
-#         i += 1
-#         if (i > 10):
-#             break
-#
-#     context.bot.send_message(chat_id=update.effective_chat.id, text=str(text))
-#
 
 if __name__ == '__main__':
     App(TOKEN).run()
