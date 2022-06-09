@@ -4,7 +4,7 @@ from telegram.ext import Updater
 import yaml
 import logging
 
-from abstract_game import DiceGame, GallowsGame
+from abstract_game import DiceGame, GallowsGame, CasinoGame
 
 TOKEN = '5290614906:AAGYFaOjyqukQHJDwBiLfpHih-xSmS0smx4'
 
@@ -256,29 +256,28 @@ class App(object):
 
         for btn in self.config['buttons']:
             if btn['button_value'] == buttonValue:
-                match btn['type']:
-                    case 'ads':
-                        query.delete_message()
-                        for msg in btn['messages']:
-                            img = open(msg['img'], 'rb')
-                            inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
-                                [InlineKeyboardButton(text=msg['text'],
-                                                      url=msg['url'])], 1))
-                            context.bot.send_photo(chat_id=update.effective_chat.id, photo=img,
-                                                   reply_markup=inlineReplyMarkup)
+                if btn['type'] == 'ads':
+                    query.delete_message()
+                    for msg in btn['messages']:
+                        img = open(msg['img'], 'rb')
+                        inlineReplyMarkup = InlineKeyboardMarkup(menuBuilder(
+                            [InlineKeyboardButton(text=msg['text'],
+                                                     url=msg['url'])], 1))
+                        context.bot.send_photo(chat_id=update.effective_chat.id, photo=img,
+                                               reply_markup=inlineReplyMarkup)
 
-                    case 'test_wrong':
-                        reply_markup = ReplyKeyboardMarkup(menuBuilder([KeyboardButton("Далее")], 1))
-                        query.edit_message_text(text=btn['message'], reply_markup=None)
-                        context.bot.send_message(chat_id=update.effective_chat.id, text="Идем дальше ?", reply_markup=reply_markup)
+                elif btn['type'] == 'test_wrong':
+                    reply_markup = ReplyKeyboardMarkup(menuBuilder([KeyboardButton("Далее")], 1))
+                    query.edit_message_text(text=btn['message'], reply_markup=None)
+                    context.bot.send_message(chat_id=update.effective_chat.id, text="Идем дальше ?", reply_markup=reply_markup)
 
-                    case 'test_right':
-                        score = self.get_context(query.from_user.id).get_score()
-                        self.get_context(query.from_user.id).set_score(score + 10)
+                elif btn['type'] == 'test_right':
+                    score = self.get_context(query.from_user.id).get_score()
+                    self.get_context(query.from_user.id).set_score(score + 10)
 
-                        reply_markup = ReplyKeyboardMarkup(menuBuilder([KeyboardButton("Далее")], 1))
-                        query.edit_message_text(text=btn['message'], reply_markup=None)
-                        context.bot.send_message(chat_id=update.effective_chat.id, text="Идем дальше ?", reply_markup=reply_markup)
+                    reply_markup = ReplyKeyboardMarkup(menuBuilder([KeyboardButton("Далее")], 1))
+                    query.edit_message_text(text=btn['message'], reply_markup=None)
+                    context.bot.send_message(chat_id=update.effective_chat.id, text="Идем дальше ?", reply_markup=reply_markup)
 
     def get_echo(self):
         def callback_funk(update, context):
