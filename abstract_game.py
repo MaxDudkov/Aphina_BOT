@@ -1,6 +1,5 @@
+import random
 import secrets
-import time
-import sched
 
 
 class AbstractGame(object):
@@ -104,7 +103,6 @@ class GallowsGame(AbstractGame):
 
         return str
 
-
     def process(self, upd, ctx, user_ctx, key):
 
         if not ('gallow_word' in user_ctx.get_state().keys()) or (not user_ctx.get_state()['gallow_word']):
@@ -157,5 +155,73 @@ class GallowsGame(AbstractGame):
 
 class CasinoGame(AbstractGame):
 
+    def generate_field(self):
+        field = [[0, 1, 2, 3, 4], [0, 1, 2, 3, 4], [0, 1, 2, 3, 4]]
+        random.shuffle(field[0])
+        random.shuffle(field[1])
+        random.shuffle(field[2])
+
+        return field
+
+    def get_coef(self, field, row):
+        value = field[2][row]
+        for i in range(2):
+            if field[i][row] != value:
+                return 0
+
+        if value == 0:
+            return 100
+        elif value == 1:
+            return 50
+        elif value == 2:
+            return -50
+        elif value == 3:
+            return -10
+        elif value == 4:
+            return 10
+
+    def draw_field(self, field):
+        str = ""
+        for j in range(1, 4):
+            for i in range(3):
+                value = field[i][j]
+                if value == 0:
+                    str += "🍋"
+                elif value == 1:
+                    str += "🍒"
+                elif value == 2:
+                    str += "🍅"
+                elif value == 3:
+                    str += "🍌"
+                elif value == 4:
+                    str += "🍇"
+            str += "\n"
+        return str
+
     def process(self, upd, ctx, user_ctx, key):
-        pass
+        try:
+            bet = int(key)
+        except Exception:
+            ctx.bot.send_message(chat_id=upd.effective_chat.id, text="Вы ввели не число :(\nПопробуйте еще раз!")
+            return
+
+        if bet > user_ctx.score:
+            ctx.bot.send_message(chat_id=upd.effective_chat.id,
+                                     text="У вас нет столько очков, ведите сумму поменьше!")
+
+        field = self.generate_field()
+        print(str(field))
+
+        coef = self.get_coef(field, 2)
+        ctx.bot.send_message(chat_id=upd.effective_chat.id,
+                            text=self.draw_field(field))
+
+        score = coef * bet
+        if score > 0:
+            ctx.bot.send_message(chat_id=upd.effective_chat.id,
+                                 text="Поздравляю, вы выйграли " + str(score) + " очков")
+
+        else:
+            ctx.bot.send_message(chat_id=upd.effective_chat.id,
+                                 text="Вы проиграли " + str(score) + " очков :(")
+
