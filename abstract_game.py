@@ -56,6 +56,7 @@ class DiceGame(AbstractGame):
             # s.run()
             user_ctx.add_score(coef * bet)
 
+
 class GallowsGame(AbstractGame):
 
     word_base = ['слово', 'виселица']
@@ -154,3 +155,8 @@ class GallowsGame(AbstractGame):
                 ctx.bot.send_message(chat_id=upd.effective_chat.id, text="Текущее слово - " + self.in_string(word))
                 ctx.bot.send_message(chat_id=upd.effective_chat.id, text=self.get_lives(user_ctx.get_state()['gallow_lives']))
 
+
+class CasinoGame(AbstractGame):
+
+    def process(self, upd, ctx, user_ctx, key):
+        pass

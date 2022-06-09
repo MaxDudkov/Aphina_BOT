@@ -46,7 +46,7 @@ class App(object):
         self.config = None
         self.token = token
         self.data_base = {}
-        self.games = {"state_dice": DiceGame(), 'state_gallows': GallowsGame()}
+        self.games = {"state_dice": DiceGame(), 'state_gallows': GallowsGame(), 'state_casino': CasinoGame()}
         logging.basicConfig(level=logging.DEBUG)
 
     def get_context(self, username, nickname=None):

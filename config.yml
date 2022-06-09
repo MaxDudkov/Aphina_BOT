@@ -353,6 +353,12 @@ commands:
     state_code: state_gallows
     text: "Введите, сколько очков хотите поставить"
 
+  - name: casino_game
+    type: game
+    cmd: Однорукий Джо
+    state_code: state_casino
+    text: "Введите, сколько очков хотите поставить"
+
 buttons:
 
   - name: 1_group
