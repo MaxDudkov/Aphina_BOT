@@ -114,6 +114,10 @@ class GallowsGame(AbstractGame):
         return str
 
     def process(self, upd, ctx, user_ctx, key):
+        if key == 'Назад':
+            user_ctx.set_state('gallow_word', [])
+            user_ctx.set_state('game', 'default')
+            return
 
         if not ('gallow_word' in user_ctx.get_state().keys()) or (not user_ctx.get_state()['gallow_word']):
             try:
@@ -151,8 +155,9 @@ class GallowsGame(AbstractGame):
                 lives = user_ctx.get_state()['gallow_lives']
                 user_ctx.set_state('gallow_lives', lives-1)
                 ctx.bot.send_message(chat_id=upd.effective_chat.id, text="Неправильная буква!")
-                if not lives:
+                if lives <= 0:
                     ctx.bot.send_message(chat_id=upd.effective_chat.id, text="Вы проиграли :(")
+                    user_ctx.set_state('gallow_word', [])
                     user_ctx.set_state('game', 'default')
                     return
 
@@ -160,6 +165,7 @@ class GallowsGame(AbstractGame):
                 ctx.bot.send_message(chat_id=upd.effective_chat.id, text="Вы выйграли!")
                 user_ctx.set_state('game', 'default')
                 user_ctx.set_state('gallow_word', [])
+                return
 
             else:
                 ctx.bot.send_message(chat_id=upd.effective_chat.id, text="Текущее слово - " + self.in_string(word))
@@ -233,8 +239,12 @@ class CasinoGame(AbstractGame):
         if score > 0:
             ctx.bot.send_message(chat_id=upd.effective_chat.id,
                                  text="Поздравляю, вы выйграли " + str(score) + " очков")
+            user_ctx.add_score(user_ctx.get_score() + score)
 
         else:
             ctx.bot.send_message(chat_id=upd.effective_chat.id,
-                                 text="Вы проиграли " + str(score) + " очков :(")
+                                 text="Вы проиграли " + str(score * -1) + " очков :(")
+            user_ctx.add_score(user_ctx.get_score() + score)
+            if not user_ctx.get_score():
+                user_ctx.set_score(0)
 

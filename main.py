@@ -297,7 +297,7 @@ class App(object):
                         return
 
             if update.message:
-                if update.message.text
+                if update.message.text:
                     update.message.reply_text(f'Я пока не знаю, что на это ответить :(')
 
         return callback_funk

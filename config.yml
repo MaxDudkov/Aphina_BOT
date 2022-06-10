@@ -358,7 +358,7 @@ commands:
     type: game
     cmd: Виселица
     state_code: state_gallows
-    text: "Введите, сколько очков хотите поставить"
+    text: "Введите, сколько очков хотите поставить\nДля выхода напишите Назад"
 
   - name: casino_game
     type: game
@@ -466,7 +466,7 @@ buttons:
     messages:
       - text: "Оценка 360°, которая меняет корпоративную культуру в ESET "
         img: './img/about_4_1.jpg'
-        url: ' https://center-game.com/eset'
+        url: 'https://center-game.com/eset'
 
       - text: "Развитие навыков работы c клиентами у инженеров DataLine "
         img: './img/about_4_2.jpg'
