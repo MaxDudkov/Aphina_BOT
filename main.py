@@ -179,7 +179,7 @@ class App(object):
                     else:
                         ctx.bot.send_message(chat_id=upd.effective_chat.id, text="Вы завершили тест")
                         exit = True
-                        self.get_context(upd.message.from_user.id).add_test(c['test_type'])
+                        self.get_context(upd.message.from_user.id, upd.message.from_user.username).add_test(c['test_type'])
                         last_test_q = c['prev_screen']
                     break
             # print(last_test_q)
@@ -216,7 +216,7 @@ class App(object):
         next_reply_markup = ReplyKeyboardMarkup(menuBuilder([KeyboardButton("Далее")], 1))
 
         def callback_funk(upd, ctx):
-            if cmd['test_type'] in self.get_context(upd.message.from_user.id).get_tests():
+            if cmd['test_type'] in self.get_context(upd.message.from_user.id, upd.message.from_user.username).get_tests():
                 ctx.bot.send_message(chat_id=upd.effective_chat.id, text="Вы уже проходили этот тест!")
                 return
 
@@ -281,7 +281,7 @@ class App(object):
                     context.bot.send_message(chat_id=update.effective_chat.id, text="Идем дальше ?", reply_markup=reply_markup)
 
                 elif btn['type'] == 'test_right':
-                    score = self.get_context(query.from_user.id).get_score()
+                    score = self.get_context(query.from_user.id, query.from_user.username).get_score()
                     self.get_context(query.from_user.id).set_score(score + 10)
 
                     reply_markup = ReplyKeyboardMarkup(menuBuilder([KeyboardButton("Далее")], 1))
@@ -290,14 +290,14 @@ class App(object):
 
     def get_echo(self):
         def callback_funk(update, context):
-            user_context = self.get_context(update.message.from_user.id)
+            user_context = self.get_context(update.message.from_user.id, update.message.from_user.username)
             for state in self.games.keys():
                 if user_context.state['game'] == state:
                         self.games[state].process(update, context, user_context, update.message.text)
                         return
 
             if update.message:
-                if update.message.text:
+                if update.message.text
                     update.message.reply_text(f'Я пока не знаю, что на это ответить :(')
 
         return callback_funk
