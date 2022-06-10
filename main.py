@@ -12,15 +12,13 @@ TOKEN = '5290614906:AAGYFaOjyqukQHJDwBiLfpHih-xSmS0smx4'
 class Context(object):
     def __init__(self):
         self.state = {'game': 'default'}
+        self.tests = []
         self.last_command = ""
         self.score = 0
         self.nickname = ""
 
     def set_state(self, key, state):
         self.state[key] = state
-
-    def set_gallow_word(self, word):
-        self.gallows_word = word
 
     def get_last_command(self):
         return self.last_command
@@ -39,6 +37,12 @@ class Context(object):
 
     def get_state(self):
         return self.state
+
+    def add_test(self, test):
+        self.tests.append(test)
+
+    def get_tests(self):
+        return self.tests
 
 
 class App(object):
@@ -175,6 +179,7 @@ class App(object):
                     else:
                         ctx.bot.send_message(chat_id=upd.effective_chat.id, text="Вы завершили тест")
                         exit = True
+                        self.get_context(upd.message.from_user.id).add_test(c['test_type'])
                         last_test_q = c['prev_screen']
                     break
             # print(last_test_q)
@@ -211,6 +216,10 @@ class App(object):
         next_reply_markup = ReplyKeyboardMarkup(menuBuilder([KeyboardButton("Далее")], 1))
 
         def callback_funk(upd, ctx):
+            if cmd['test_type'] in self.get_context(upd.message.from_user.id).get_tests():
+                ctx.bot.send_message(chat_id=upd.effective_chat.id, text="Вы уже проходили этот тест!")
+                return
+
             ctx.bot.send_message(chat_id=upd.effective_chat.id, text="Вы запустили тест:\n" + cmd['cmd'], reply_markup=next_reply_markup)
             self.get_context(upd.message.from_user.id, upd.message.from_user.username).set_last_command(cmd['name'])
             ctx.bot.send_message(chat_id=upd.effective_chat.id, text=cmd['question'], reply_markup=reply_markup)

@@ -140,6 +140,7 @@ class GallowsGame(AbstractGame):
 
         else:
             word = user_ctx.get_state()['gallow_word']
+            key = key.lower()
             if self.is_letter_in_word(word, key) == 1:
                 ctx.bot.send_message(chat_id=upd.effective_chat.id, text="Правильно")
 
@@ -153,10 +154,12 @@ class GallowsGame(AbstractGame):
                 if not lives:
                     ctx.bot.send_message(chat_id=upd.effective_chat.id, text="Вы проиграли :(")
                     user_ctx.set_state('game', 'default')
+                    return
 
             if self.is_guessed(word):
                 ctx.bot.send_message(chat_id=upd.effective_chat.id, text="Вы выйграли!")
                 user_ctx.set_state('game', 'default')
+                user_ctx.set_state('gallow_word', [])
 
             else:
                 ctx.bot.send_message(chat_id=upd.effective_chat.id, text="Текущее слово - " + self.in_string(word))
