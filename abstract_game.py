@@ -117,6 +117,7 @@ class GallowsGame(AbstractGame):
         if key == 'Назад':
             user_ctx.set_state('gallow_word', [])
             user_ctx.set_state('game', 'default')
+            user_ctx.set_state('gallow_bet', 0)
             return
 
         if not ('gallow_word' in user_ctx.get_state().keys()) or (not user_ctx.get_state()['gallow_word']):
@@ -132,6 +133,7 @@ class GallowsGame(AbstractGame):
                 return
 
             else:
+                user_ctx.set_state('gallow_bet', bet)
                 new_word = []
                 for letter in self.get_random_word():
                     new_word.append([letter, 0])
@@ -155,16 +157,20 @@ class GallowsGame(AbstractGame):
                 lives = user_ctx.get_state()['gallow_lives']
                 user_ctx.set_state('gallow_lives', lives-1)
                 ctx.bot.send_message(chat_id=upd.effective_chat.id, text="Неправильная буква!")
-                if lives <= 0:
+                if lives - 1 <= 0:
                     ctx.bot.send_message(chat_id=upd.effective_chat.id, text="Вы проиграли :(")
+                    user_ctx.add_score(user_ctx.get_state()['gallow_bet'] * -1)
                     user_ctx.set_state('gallow_word', [])
                     user_ctx.set_state('game', 'default')
+                    user_ctx.set_state('gallow_bet', 0)
                     return
 
             if self.is_guessed(word):
                 ctx.bot.send_message(chat_id=upd.effective_chat.id, text="Вы выйграли!")
+                user_ctx.add_score(user_ctx.get_state()['gallow_bet'])
                 user_ctx.set_state('game', 'default')
                 user_ctx.set_state('gallow_word', [])
+                user_ctx.set_state('gallow_bet', 0)
                 return
 
             else:
@@ -186,7 +192,7 @@ class CasinoGame(AbstractGame):
         value = field[2][row]
         for i in range(2):
             if field[i][row] != value:
-                return 0
+                return -1
 
         if value == 0:
             return 100
@@ -218,15 +224,20 @@ class CasinoGame(AbstractGame):
         return str
 
     def process(self, upd, ctx, user_ctx, key):
+        if '_' in key:
+            ctx.bot.send_message(chat_id=upd.effective_chat.id, text="Вы ввели не число :(\nПопробуйте еще раз!")
+            return
+
         try:
-            bet = int(key)
+            bet = abs(int(key))
         except Exception:
             ctx.bot.send_message(chat_id=upd.effective_chat.id, text="Вы ввели не число :(\nПопробуйте еще раз!")
             return
 
-        if bet > user_ctx.score:
+        if bet > user_ctx.get_score():
             ctx.bot.send_message(chat_id=upd.effective_chat.id,
                                      text="У вас нет столько очков, ведите сумму поменьше!")
+            return
 
         field = self.generate_field()
         print(str(field))
@@ -239,12 +250,13 @@ class CasinoGame(AbstractGame):
         if score > 0:
             ctx.bot.send_message(chat_id=upd.effective_chat.id,
                                  text="Поздравляю, вы выйграли " + str(score) + " очков")
-            user_ctx.add_score(user_ctx.get_score() + score)
+            user_ctx.add_score(score)
 
         else:
             ctx.bot.send_message(chat_id=upd.effective_chat.id,
-                                 text="Вы проиграли " + str(score * -1) + " очков :(")
-            user_ctx.add_score(user_ctx.get_score() + score)
-            if not user_ctx.get_score():
-                user_ctx.set_score(0)
+                                 text="Вы проиграли " + str(abs(score)) + " очков :(")
+            user_ctx.add_score(score)
+
+        user_ctx.set_state('game', 'default')
+
 
